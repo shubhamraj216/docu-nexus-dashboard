@@ -21,7 +21,7 @@ export const Navbar = ({ isSidebarOpen, setIsSidebarOpen }: NavbarProps) => {
           <span className="sr-only">Toggle sidebar</span>
         </Button>
         <div className="ml-auto flex items-center space-x-4">
-          <div className="text-sm font-medium">DocManager Dashboard</div>
+          <div className="text-sm font-medium">Bot Dashboard</div>
         </div>
       </div>
     </header>
