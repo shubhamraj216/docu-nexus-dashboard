@@ -39,7 +39,7 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
       label: doc.document.substring(0, 30) + (doc.document.length > 30 ? "..." : ""),
       type: "document",
       radius: 25,
-      docData: doc as any, // Store the document data for hover reference
+      docData: doc,
     }));
 
     const tagNodes: VisualNode[] = uniqueTags.map(tag => ({
@@ -57,14 +57,14 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
       ...documents.map(doc => ({
         source: `category-${doc.category}`,
         target: `document-${doc._id}`,
-        type: "category-document"
+        type: "category-document" as const,
       })),
       // Links from documents to tags
       ...documents.flatMap(doc => 
         doc.tags.map(tag => ({
           source: `document-${doc._id}`,
           target: `tag-${tag}`,
-          type: "document-tag"
+          type: "document-tag" as const,
         }))
       )
     ];

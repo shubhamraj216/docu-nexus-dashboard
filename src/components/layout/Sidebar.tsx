@@ -57,7 +57,7 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         <div className="flex items-center gap-2 text-sidebar-foreground">
           <FileText className="h-6 w-6" />
           <span className={cn("font-semibold", !isSidebarOpen && "hidden")}>
-            DocManager
+            Bot Dashboard
           </span>
         </div>
         <div className="ml-auto">
@@ -177,7 +177,7 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <div className="flex items-center justify-center text-xs text-sidebar-foreground/70">
-          {isSidebarOpen ? "DocManager v1.0" : "v1.0"}
+          {isSidebarOpen ? "Bot Dashboard v1.0" : "v1.0"}
         </div>
       </SidebarFooter>
     </SidebarComponent>

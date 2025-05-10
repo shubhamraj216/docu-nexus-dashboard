@@ -106,7 +106,7 @@ export const QueryDocuments = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any category</SelectItem>
+                  <SelectItem value="any">Any category</SelectItem>
                   {statsLoading 
                     ? <SelectItem value="_loading" disabled>Loading categories...</SelectItem>
                     : stats?.categories.map((cat) => (
