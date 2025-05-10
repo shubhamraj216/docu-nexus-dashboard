@@ -1,10 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Document } from "@/lib/types";
+import { Document, VisualNode, VisualLink } from "@/lib/types";
 import * as d3 from "d3";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tooltip } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 
 interface DocumentVisualizationProps {
   documents: Document[];
@@ -12,7 +10,6 @@ interface DocumentVisualizationProps {
 
 export const DocumentVisualization = ({ documents }: DocumentVisualizationProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const [hoveredNode, setHoveredNode] = useState<Document | null>(null);
   
   useEffect(() => {
@@ -29,42 +26,33 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
     const allTags = documents.flatMap(d => d.tags);
     const uniqueTags = Array.from(new Set(allTags));
 
-    // Set up the simulation
-    const simulation = d3.forceSimulation()
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("charge", d3.forceManyBody().strength(-200))
-      .force("collide", d3.forceCollide().radius(d => (d as any).radius + 10))
-      .force("link", d3.forceLink().id(d => (d as any).id).distance(100));
-
     // Create nodes for categories, documents, and tags
-    const categoryNodes = categories.map(category => ({
+    const categoryNodes: VisualNode[] = categories.map(category => ({
       id: `category-${category}`,
       label: category,
       type: "category",
       radius: 40,
     }));
 
-    const documentNodes = documents.map(doc => ({
+    const documentNodes: VisualNode[] = documents.map(doc => ({
       id: `document-${doc._id}`,
       label: doc.document.substring(0, 30) + (doc.document.length > 30 ? "..." : ""),
       type: "document",
-      category: doc.category,
-      tags: doc.tags,
-      docData: doc,
       radius: 25,
+      docData: doc as any, // Store the document data for hover reference
     }));
 
-    const tagNodes = uniqueTags.map(tag => ({
+    const tagNodes: VisualNode[] = uniqueTags.map(tag => ({
       id: `tag-${tag}`,
       label: tag,
       type: "tag", 
       radius: 15,
     }));
 
-    const nodes = [...categoryNodes, ...documentNodes, ...tagNodes];
+    const nodes: VisualNode[] = [...categoryNodes, ...documentNodes, ...tagNodes];
 
     // Create links between nodes
-    const links = [
+    const links: VisualLink[] = [
       // Links from categories to documents
       ...documents.map(doc => ({
         source: `category-${doc.category}`,
@@ -80,6 +68,13 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
         }))
       )
     ];
+
+    // Set up the simulation
+    const simulation = d3.forceSimulation(nodes as any)
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("charge", d3.forceManyBody().strength(-200))
+      .force("collide", d3.forceCollide().radius(d => (d as any).radius + 10))
+      .force("link", d3.forceLink(links).id(d => (d as any).id).distance(100));
 
     // Create the links
     const link = svg.append("g")
@@ -104,9 +99,9 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
       })
       .attr("stroke", "#fff")
       .attr("stroke-width", 1.5)
-      .on("mouseover", function(event, d) {
+      .on("mouseover", function(event, d: any) {
         d3.select(this).attr("stroke", "#000").attr("stroke-width", 2);
-        if (d.type === "document") {
+        if (d.type === "document" && d.docData) {
           setHoveredNode(d.docData);
         }
       })
@@ -114,10 +109,7 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
         d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1.5);
         setHoveredNode(null);
       })
-      .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
+      .call(drag(simulation) as any);
 
     // Add labels to nodes
     const label = svg.append("g")
@@ -135,7 +127,7 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
       .attr("fill", "#333");
 
     // Update positions on simulation tick
-    simulation.nodes(nodes as any).on("tick", () => {
+    simulation.on("tick", () => {
       link
         .attr("x1", d => (d.source as any).x)
         .attr("y1", d => (d.source as any).y)
@@ -143,31 +135,37 @@ export const DocumentVisualization = ({ documents }: DocumentVisualizationProps)
         .attr("y2", d => (d.target as any).y);
 
       node
-        .attr("cx", d => Math.max(d.radius, Math.min(width - d.radius, d.x)))
-        .attr("cy", d => Math.max(d.radius, Math.min(height - d.radius, d.y)));
+        .attr("cx", d => Math.max(d.radius, Math.min(width - d.radius, d.x as number)))
+        .attr("cy", d => Math.max(d.radius, Math.min(height - d.radius, d.y as number)));
 
       label
         .attr("x", d => d.x)
         .attr("y", d => d.y);
     });
 
-    simulation.force<d3.ForceLink<any, any>>("link")!.links(links);
-
-    function dragstarted(event: any) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
-    }
-    
-    function dragged(event: any) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
-    
-    function dragended(event: any) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
+    // Define drag behavior
+    function drag(simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>) {
+      function dragstarted(event: any, d: any) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+      
+      function dragged(event: any, d: any) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+      
+      function dragended(event: any, d: any) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+      
+      return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
     }
 
     return () => {

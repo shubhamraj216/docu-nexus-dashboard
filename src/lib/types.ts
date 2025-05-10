@@ -23,6 +23,7 @@ export interface VisualNode {
   y?: number;
   fx?: number | null;
   fy?: number | null;
+  docData?: Document;
 }
 
 export interface VisualLink {

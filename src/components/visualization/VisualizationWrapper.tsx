@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Document } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentVisualization } from "./DocumentVisualization";
-import { Grid3X3 } from "lucide-react";
-import { NetworkPlot } from "lucide-react";
+import { Grid3X3, ChartNetwork } from "lucide-react";
 
 interface VisualizationWrapperProps {
   documents: Document[];
@@ -27,7 +26,7 @@ export const VisualizationWrapper = ({ documents, meshView }: VisualizationWrapp
             <span>Mesh View</span>
           </TabsTrigger>
           <TabsTrigger value="visualize" className="flex items-center gap-2">
-            <NetworkPlot className="h-4 w-4" />
+            <ChartNetwork className="h-4 w-4" />
             <span>Visualize</span>
           </TabsTrigger>
         </TabsList>
