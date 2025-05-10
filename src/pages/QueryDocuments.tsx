@@ -108,7 +108,7 @@ export const QueryDocuments = () => {
                 <SelectContent>
                   <SelectItem value="">Any category</SelectItem>
                   {statsLoading 
-                    ? <SelectItem value="" disabled>Loading categories...</SelectItem>
+                    ? <SelectItem value="_loading" disabled>Loading categories...</SelectItem>
                     : stats?.categories.map((cat) => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))
@@ -218,7 +218,7 @@ export const QueryDocuments = () => {
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-docblue-600 flex-shrink-0" />
+                          <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
                           <Link
                             to={`/documents/${doc._id}`}
                             className="font-medium truncate hover:text-primary hover:underline"
@@ -235,7 +235,7 @@ export const QueryDocuments = () => {
                       
                       <div className="flex flex-wrap gap-2 justify-end">
                         {doc.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="bg-docblue-50 text-xs">
+                          <Badge key={tag} variant="secondary" className="bg-purple-50 text-xs">
                             {tag}
                           </Badge>
                         ))}

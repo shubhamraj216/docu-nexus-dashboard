@@ -13,3 +13,20 @@ export interface DocumentStats {
   categories: string[];
   tags: string[];
 }
+
+export interface VisualNode {
+  id: string;
+  label: string;
+  type: "category" | "document" | "tag";
+  radius: number;
+  x?: number;
+  y?: number;
+  fx?: number | null;
+  fy?: number | null;
+}
+
+export interface VisualLink {
+  source: string;
+  target: string;
+  type: "category-document" | "document-tag";
+}
